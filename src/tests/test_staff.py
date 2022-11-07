@@ -8,4 +8,13 @@ def test_employees_list(test_client: TestClient):
     with TestClient(app=app) as client:
         response = client.get("/")
         assert response.status_code == HTTP_200_OK
-        assert response.json()['CEO'] == "Ivan Marakasoff"
+        assert len(response.json()['staff_list']) == 4
+        assert response.json()['staff_list'][-1]['name'] == 'Giveme Moremoney'
+
+
+def test_employee_details(test_client: TestClient):
+    test_data = {"id": 1, 'post': "CEO", 'name': "Ivan Marakasoff"}
+    with TestClient(app=app) as client:
+        response = client.get("/0/details")
+        assert response.status_code == HTTP_200_OK
+        assert response.json() == test_data
