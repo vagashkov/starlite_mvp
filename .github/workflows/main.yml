@@ -16,5 +16,5 @@ jobs:
       - name: Run script
         run: |
         
-          pip install < requirements.txt
+          pip install starlite pytest
           py.test tests
