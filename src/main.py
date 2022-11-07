@@ -2,9 +2,9 @@ from starlite import Starlite, get
 
 
 @get("/")
-def hello_world() -> dict[str, str]:
+def employees_list() -> dict[str, str]:
     """Keeping the tradition alive with hello world."""
-    return {"hello": "world"}
+    return {"CEO": "Ivan Marakasoff"}
 
 
-app = Starlite(route_handlers=[hello_world])
+app = Starlite(route_handlers=[employees_list])
