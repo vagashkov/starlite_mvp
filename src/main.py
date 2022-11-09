@@ -1,4 +1,4 @@
-from starlite import Starlite, get
+from starlite import Starlite, Controller, get
 
 employees_data = {"staff_list": [
     {"id": 1, 'post': "CEO", 'name': "Ivan Marakasoff"},
@@ -8,16 +8,16 @@ employees_data = {"staff_list": [
 }
 
 
-@get("/")
-def employees_list() -> dict[str, str]:
-    """Keeping the tradition alive with hello world."""
-    return employees_data
+class EmployeeController(Controller):
+    path = '/employees'
+
+    @get()
+    def employees_list(self) -> dict[str, str]:
+        return employees_data
+
+    @get("/{emp_id: int}")
+    def employee_details(self, emp_id: int) -> dict[str, str]:
+        return employees_data['staff_list'][emp_id]
 
 
-@get("/0/details")
-def employee_details() -> dict[str, str]:
-    """Keeping the tradition alive with hello world."""
-    return employees_data['staff_list'][0]
-
-
-app = Starlite(route_handlers=[employees_list, employee_details])
+app = Starlite(route_handlers=[EmployeeController])
