@@ -16,5 +16,5 @@ jobs:
       - name: Run script
         run: |
         
-          pip install starlite pytest
+          pip install starlite pytest SQLAlchemy psycopg2-binary
           py.test src/tests
