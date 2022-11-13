@@ -39,4 +39,4 @@ jobs:
         run: |
         
           pip install starlite pytest SQLAlchemy psycopg2-binary
-      #    py.test src/tests
+          py.test src/tests
