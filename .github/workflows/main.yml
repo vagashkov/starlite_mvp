@@ -15,7 +15,7 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_DB: staff
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: postgres_password
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
         ports:
@@ -33,10 +33,10 @@ jobs:
         run: |
           apt-get update
           apt-get install --yes postgresql-client
-      - name: Run migrations
-        run: psql -f src/tests/db_migration.sql postgresql://postgres:postgres@localhost:5432/staff
-      - name: Run script
-        run: |
-        
-          pip install starlite pytest SQLAlchemy psycopg2-binary
-          # py.test src/tests
+      #- name: Run migrations
+      #  run: psql -f src/tests/db_migration.sql postgresql://postgres:postgres_password@localhost:5432/staff
+      #- name: Run script
+      #  run: |
+      #  
+      #    pip install starlite pytest SQLAlchemy psycopg2-binary
+      #    py.test src/tests
