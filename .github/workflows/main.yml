@@ -9,6 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     name: Checks with black, isort and possibly run tests
     container: python:3.9
+    
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres_db
+          POSTGRES_PASSWORD: postgres_password
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres_user
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -17,4 +33,4 @@ jobs:
         run: |
         
           pip install starlite pytest SQLAlchemy psycopg2-binary
-          py.test src/tests
+          # py.test src/tests
