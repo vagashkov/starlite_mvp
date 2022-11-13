@@ -15,9 +15,9 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_DB: staff
-          POSTGRES_PASSWORD: staff_pwd
+          POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
-          POSTGRES_USER: staff
+          POSTGRES_USER: postgres
         ports:
           - 5432:5432
         options: >-
@@ -34,7 +34,7 @@ jobs:
           apt-get update
           apt-get install --yes postgresql-client
       - name: Run migrations
-        run: psql -f src/tests/db_migration.sql postgresql://staff:staff_pwd@localhost:5432/staff
+        run: psql -f src/tests/db_migration.sql postgresql://postgres:postgres@localhost:5432/staff
       - name: Run script
         run: |
         
