@@ -29,6 +29,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Install PostgreSQL client
+        run: |
+          apt-get update
+          apt-get install --yes postgresql-client
       - name: Run migrations
         run: psql -f src/tests/db_migration.sql postgresql://staff:staff_pwd@localhost:5432/staff
       - name: Run script
