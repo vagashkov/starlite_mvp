@@ -11,7 +11,7 @@ from typing import cast, Optional
 
 Base = declarative_base()
 
-sqlalchemy_config = SQLAlchemyConfig(connection_string="postgresql://staff:staff_pwd@localhost/staff", use_async_engine=False)
+sqlalchemy_config = SQLAlchemyConfig(connection_string="postgresql://staff:staff_pwd@postgres/staff", use_async_engine=False)
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
 dto_factory = DTOFactory(plugins=[sqlalchemy_plugin])
 
