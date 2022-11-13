@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Run migrations
+        run: psql -f src/tests/db_migration.sql postgresql://staff:staff_pwd@localhost:5432/staff
       - name: Run script
         run: |
         
