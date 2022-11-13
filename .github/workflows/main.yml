@@ -35,8 +35,8 @@ jobs:
           apt-get install --yes postgresql-client
       - name: Run migrations
         run: psql -f src/tests/db_migration.sql postgresql://postgres:postgres_password@postgres:5432/staff
-      #- name: Run script
-      #  run: |
-      #  
-      #    pip install starlite pytest SQLAlchemy psycopg2-binary
+      - name: Run script
+        run: |
+        
+          pip install starlite pytest SQLAlchemy psycopg2-binary
       #    py.test src/tests
