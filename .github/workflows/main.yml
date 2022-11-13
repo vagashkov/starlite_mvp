@@ -14,10 +14,10 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: postgres_db
-          POSTGRES_PASSWORD: postgres_password
+          POSTGRES_DB: staff
+          POSTGRES_PASSWORD: staff_pwd
           POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres_user
+          POSTGRES_USER: staff
         ports:
           - 5432:5432
         options: >-
