@@ -12,9 +12,12 @@ from typing import cast, Optional
 
 Base = declarative_base()
 db_host = environ.get('POSTGRES_HOST', 'localhost')
+db_user = environ.get('POSTGRES_USER', 'postgres')
+db_password = environ.get('POSTGRES_PASSWORD', 'postgres_password')
+db_name = environ.get('POSTGRES_DB', 'staff')
 
 sqlalchemy_config = SQLAlchemyConfig(
-    connection_string="postgresql://postgres:postgres_password@{}/staff".format(db_host),
+    connection_string="postgresql://{}:{}@{}/{}".format(db_user, db_password, db_host, db_name),
     use_async_engine=False,
 )
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
