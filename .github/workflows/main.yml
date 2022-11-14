@@ -42,3 +42,5 @@ jobs:
           pip install starlite pytest SQLAlchemy psycopg2-binary black
           black .
           py.test src/tests
+        env:
+          POSTGRES_HOST: postgres
