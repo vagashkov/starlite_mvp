@@ -3,7 +3,7 @@ from starlite.testing import TestClient
 
 from ..main import app
 
-test_data = {"id": 1, 'post': "CEO", 'name': "Ivan Marakasoff"}
+test_data = {"id": 1, "post": "CEO", "name": "Ivan Marakasoff"}
 
 
 def test_employees_list(test_client: TestClient):
@@ -11,7 +11,7 @@ def test_employees_list(test_client: TestClient):
         response = client.get("/employees/")
         assert response.status_code == HTTP_200_OK
         assert len(response.json()) == 4
-        assert response.json()[-1]['name'] == 'Giveme Moremoney'
+        assert response.json()[-1]["name"] == "Giveme Moremoney"
 
 
 # def test_employee_details(test_client: TestClient):

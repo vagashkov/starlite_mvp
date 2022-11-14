@@ -11,7 +11,10 @@ from typing import cast, Optional
 
 Base = declarative_base()
 
-sqlalchemy_config = SQLAlchemyConfig(connection_string="postgresql://postgres:postgres_password@postgres/staff", use_async_engine=False)
+sqlalchemy_config = SQLAlchemyConfig(
+    connection_string="postgresql://postgres:postgres_password@postgres/staff",
+    use_async_engine=False,
+)
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
 dto_factory = DTOFactory(plugins=[sqlalchemy_plugin])
 
@@ -29,18 +32,20 @@ def on_startup() -> None:
 
 
 class EmployeeController(Controller):
-    '''
+    """
     Manages employees info (retrieve from database etc).
-    '''
+    """
 
-    @get(path='/employees/')
+    @get(path="/employees/")
     def employees_list(self, db_session: Session) -> dict[str, str]:
         """Get a company by its ID and return it.
-            If a company with that ID does not exist, return a 404 response
-            """
+        If a company with that ID does not exist, return a 404 response
+        """
         employees: Optional[Employee] = db_session.scalars(select(Employee)).all()
         if not employees:
-            raise HTTPException(detail=f"No employees found", status_code=HTTP_404_NOT_FOUND)
+            raise HTTPException(
+                detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
+            )
         return employees
 
     @get(path="/employees/{employee_id:int}/")
@@ -48,10 +53,19 @@ class EmployeeController(Controller):
         """Get an employee by its ID and return it.
         If it doesn't with that ID does not exist, return a 404 response
         """
-        employee: Optional[Employee] = db_session.scalars(select(Employee).where(Employee.id == employee_id)).one_or_none()
+        employee: Optional[Employee] = db_session.scalars(
+            select(Employee).where(Employee.id == employee_id)
+        ).one_or_none()
         if not employee:
-            raise HTTPException(detail=f"Company with ID {employee_id} not found", status_code=HTTP_404_NOT_FOUND)
+            raise HTTPException(
+                detail=f"Company with ID {employee_id} not found",
+                status_code=HTTP_404_NOT_FOUND,
+            )
         return employee
 
 
-app = Starlite(route_handlers=[EmployeeController], on_startup=[on_startup], plugins=[sqlalchemy_plugin])
+app = Starlite(
+    route_handlers=[EmployeeController],
+    on_startup=[on_startup],
+    plugins=[sqlalchemy_plugin],
+)
