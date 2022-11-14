@@ -29,14 +29,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      # Prepare test database
       - name: Install PostgreSQL client
         run: |
           apt-get update
           apt-get install --yes postgresql-client
       - name: Run migrations
         run: psql -f src/tests/db_migration.sql postgresql://postgres:postgres_password@postgres:5432/staff
+      # Install packages and run tests vs code
       - name: Run script
-        run: |
-        
-          pip install starlite pytest SQLAlchemy psycopg2-binary
+        run: |        
+          pip install starlite pytest SQLAlchemy psycopg2-binary black
+          black .
           py.test src/tests
