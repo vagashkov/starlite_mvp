@@ -1,6 +1,7 @@
 import asyncio
 
-# from asyncpg import connect, Connection
+# from asyncpg import connect,
+from os import environ
 from sqlalchemy import Column, Float, Integer, String, select
 from sqlalchemy.orm import Mapped, Session, declarative_base
 from starlite import Controller, DTOFactory, HTTPException, Starlite, get
@@ -10,9 +11,10 @@ from typing import cast, Optional
 
 
 Base = declarative_base()
+db_host = environ.get('POSTGRES_HOST', 'localhost')
 
 sqlalchemy_config = SQLAlchemyConfig(
-    connection_string="postgresql://postgres:postgres_password@postgres/staff",
+    connection_string="postgresql://postgres:postgres_password@{}/staff".format(db_host),
     use_async_engine=False,
 )
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
