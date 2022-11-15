@@ -10,8 +10,8 @@ def test_employees_list(test_client: TestClient):
     with TestClient(app=app) as client:
         response = client.get("/employees/")
         assert response.status_code == HTTP_200_OK
-        assert len(response.json()) == 4
-        assert response.json()[-1]["name"] == "Giveme Moremoney"
+        assert len(response.json()) == 5
+        assert response.json()[-1]["name"] == "Chair fon Table"
 
 
 # def test_employee_details(test_client: TestClient):

@@ -1,23 +1,28 @@
 import asyncio
+import asyncpg
 
 # from asyncpg import connect,
 from os import environ
 from sqlalchemy import Column, Float, Integer, String, select
 from sqlalchemy.orm import Mapped, Session, declarative_base
-from starlite import Controller, DTOFactory, HTTPException, Starlite, get
+from sqlalchemy.ext.asyncio import create_async_engine
+
+from starlite import State, Controller, DTOFactory, HTTPException, Starlite, get
 from starlite.plugins.sql_alchemy import SQLAlchemyConfig, SQLAlchemyPlugin
 from starlite.status_codes import HTTP_404_NOT_FOUND
 from typing import cast, Optional
 
 
 Base = declarative_base()
-db_host = environ.get('POSTGRES_HOST', 'localhost')
-db_user = environ.get('POSTGRES_USER', 'postgres')
-db_password = environ.get('POSTGRES_PASSWORD', 'postgres_password')
-db_name = environ.get('POSTGRES_DB', 'staff')
+db_host = environ.get("POSTGRES_HOST", "localhost")
+db_user = environ.get("POSTGRES_USER", "postgres")
+db_password = environ.get("POSTGRES_PASSWORD", "postgres_password")
+db_name = environ.get("POSTGRES_DB", "staff")
 
 sqlalchemy_config = SQLAlchemyConfig(
-    connection_string="postgresql://{}:{}@{}/{}".format(db_user, db_password, db_host, db_name),
+    connection_string="postgresql://{}:{}@{}/{}".format(
+        db_user, db_password, db_host, db_name
+    ),
     use_async_engine=False,
 )
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
@@ -31,9 +36,18 @@ class Employee(Base):
     post: Mapped[float] = Column(String)
 
 
-def on_startup() -> None:
-    """Initialize the database."""
-    Base.metadata.create_all(sqlalchemy_config.engine)
+async def on_startup(state: State) -> None:
+    """Initialize database connection and store it into state item."""
+    engine = create_async_engine(
+        "postgresql+asyncpg://{}:{}@{}/{}".format(
+            db_user, db_password, db_host, db_name
+        ),
+        echo=True,
+    )
+    # async with engine.begin() as conn:
+    # await conn.run_sync(Base.metadata.drop_all)
+    # await conn.run_sync(Base.metadata.create_all)
+    state.engine = engine
 
 
 class EmployeeController(Controller):
@@ -42,16 +56,20 @@ class EmployeeController(Controller):
     """
 
     @get(path="/employees/")
-    def employees_list(self, db_session: Session) -> dict[str, str]:
-        """Get a company by its ID and return it.
-        If a company with that ID does not exist, return a 404 response
-        """
-        employees: Optional[Employee] = db_session.scalars(select(Employee)).all()
-        if not employees:
-            raise HTTPException(
-                detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
-            )
-        return employees
+    async def employees_list(self, state: State) -> dict:
+        """Get employees list and return it."""
+        async with state.engine.connect() as conn:
+            result = await conn.execute(select(Employee))
+            if not result:
+                raise HTTPException(
+                    detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
+                )
+            records_list = result.fetchall()
+            employees = [
+                {"id": record.id, "name": record.name, "post": record.post}
+                for record in records_list
+            ]
+            return employees
 
     @get(path="/employees/{employee_id:int}/")
     def get_employee(self, employee_id: str, db_session: Session) -> Employee:

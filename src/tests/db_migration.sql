@@ -69,6 +69,7 @@ INSERT INTO public.employees VALUES (1, 'Ivan Marakasoff', 'CEO');
 INSERT INTO public.employees VALUES (2, 'Top Lawyer', 'CLO');
 INSERT INTO public.employees VALUES (3, 'Kilobit Megabitov', 'CIO');
 INSERT INTO public.employees VALUES (4, 'Giveme Moremoney', 'CFO');
+INSERT INTO public.employees VALUES (5, 'Chair fon Table', 'CAO');
 
 
 --
