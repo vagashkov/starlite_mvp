@@ -39,7 +39,7 @@ jobs:
       # Install packages and run tests vs code
       - name: Run script
         run: |        
-          pip install starlite pytest SQLAlchemy psycopg2-binary black
+          pip install starlite pytest SQLAlchemy psycopg2-binary asyncpg black
           black .
           py.test src/tests
         env:
