@@ -50,6 +50,13 @@ async def on_startup(state: State) -> None:
     state.engine = engine
 
 
+async def on_shutdown(state: State) -> None:
+    """Closes the db connection stored in the application State object."""
+    # if getattr(state, "engine", None):
+    #     await state.engine.connect.dispose()
+    pass
+
+
 class EmployeeController(Controller):
     """
     Manages employees info (retrieve from database etc).
@@ -69,6 +76,7 @@ class EmployeeController(Controller):
                 {"id": record.id, "name": record.name, "post": record.post}
                 for record in records_list
             ]
+            await conn.close()
             return employees
 
     @get(path="/employees/{employee_id:int}/")
@@ -90,5 +98,6 @@ class EmployeeController(Controller):
 app = Starlite(
     route_handlers=[EmployeeController],
     on_startup=[on_startup],
+    on_shutdown=[on_shutdown],
     plugins=[sqlalchemy_plugin],
 )
