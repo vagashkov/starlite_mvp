@@ -76,6 +76,7 @@ class EmployeeController(Controller):
                 {"id": record.id, "name": record.name, "post": record.post}
                 for record in records_list
             ]
+            # Close db connection
             await conn.close()
             return employees
 
