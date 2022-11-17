@@ -1,7 +1,5 @@
 import pytest
-
 from starlite.testing import TestClient
-
 from ..main import app
 
 
