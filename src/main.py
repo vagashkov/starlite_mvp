@@ -8,7 +8,8 @@ from sqlalchemy.orm import Mapped, declarative_base
 from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from starlite import State, Controller, HTTPException, Starlite, get, post, patch, delete
+from starlite import State, Controller, HTTPException, Starlite
+from starlite.handlers import get, post, patch, delete
 from starlite.plugins.sql_alchemy import SQLAlchemyConfig, SQLAlchemyPlugin
 from starlite.status_codes import HTTP_404_NOT_FOUND
 from starlite.types import Partial
@@ -102,9 +103,9 @@ class EmployeeController(Controller):
     async def create_employee(self, data: Employee) -> Employee:
         pass
 
-    @patch(path="/{employee_id:str}/")
-    async def update_employee(self, data: Partial[Employee]) -> None:
-        pass
+    # @patch(path="/{employee_id:str}/")
+    # async def update_employee(self, data: Partial[Employee]) -> None:
+    #     pass
 
     @delete(path="/{employee_id:str}/")
     async def delete_employee(self, data: Employee) -> None:
