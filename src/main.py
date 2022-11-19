@@ -4,14 +4,14 @@ import asyncpg
 # from asyncpg import connect,
 from os import environ
 from sqlalchemy import Column, Integer, String, select
-from sqlalchemy.orm import Mapped, Session, declarative_base
+from sqlalchemy.orm import Mapped, declarative_base
 from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from starlite import State, Controller, DTOFactory, HTTPException, Starlite, get
+from starlite import State, Controller, HTTPException, Starlite, get, post, patch, delete
 from starlite.plugins.sql_alchemy import SQLAlchemyConfig, SQLAlchemyPlugin
 from starlite.status_codes import HTTP_404_NOT_FOUND
-from typing import Optional
+from starlite.types import Partial
 
 
 Base = declarative_base()
@@ -62,7 +62,9 @@ class EmployeeController(Controller):
     """
     Manages employees info (retrieve from database etc).
     """
-    @get(path="/employees/")
+    path = "/employees"
+
+    @get()
     async def employees_list(self, state: State) -> dict:
         """Get employees list and return it."""
         async with state.engine.connect() as conn:
@@ -78,12 +80,11 @@ class EmployeeController(Controller):
             ]
             return employees
 
-    @get(path="/employees/{employee_id:str}/")
+    @get(path="/{employee_id:str}/")
     async def get_employee(self, employee_id: int, state: State) -> dict:
         """Get an employee by its ID and return it.
         If it doesn't with that ID does not exist, return a 404 response
         """
-        """Get employees list and return it."""
         async with state.engine.connect() as conn:
             result = await conn.execute(select(Employee).where(Employee.id == employee_id))
             if not result:
@@ -96,6 +97,18 @@ class EmployeeController(Controller):
                 for record in records_list
             ]
             return employees
+
+    @post()
+    async def create_employee(self, data: Employee) -> Employee:
+        pass
+
+    @patch(path="/{employee_id:str}/")
+    async def update_employee(self, data: Partial[Employee]) -> None:
+        pass
+
+    @delete(path="/{employee_id:str}/")
+    async def delete_employee(self, data: Employee) -> None:
+        pass
 
 
 app = Starlite(
