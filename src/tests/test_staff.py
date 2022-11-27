@@ -1,5 +1,5 @@
 import pytest
-from starlite.status_codes import HTTP_200_OK, HTTP_201_CREATED
+from starlite.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from starlite.testing import TestClient
 
 from ..main import app
@@ -20,7 +20,8 @@ def test_employees_list():
         clear_employees(test_client)
         check_create_employee(test_client)
         check_employees(test_client)
-        check_employee_details(test_client)
+        check_existing_employee_details(test_client)
+        check_non_existing_employee_details(test_client)
 
 
 def clear_employees(client: TestClient):
@@ -31,13 +32,17 @@ def check_employees(client: TestClient):
     response = client.get("/employees/")
     assert response.status_code == HTTP_200_OK
     assert len(response.json()) == len(test_data)
-    assert response.json()[-1] == test_data[-1]
 
 
-def check_employee_details(client: TestClient):
+def check_existing_employee_details(client: TestClient):
     response = client.get("/employees/1/")
     assert response.status_code == HTTP_200_OK
     assert response.json()[0] == test_data[0]
+
+
+def check_non_existing_employee_details(client: TestClient):
+    response = client.get("/employees/999/")
+    assert response.status_code == HTTP_404_NOT_FOUND
 
 
 def check_create_employee(client: TestClient):

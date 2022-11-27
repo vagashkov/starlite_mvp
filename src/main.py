@@ -3,9 +3,12 @@ from os import environ
 from typing import Any
 
 
-from sqlalchemy import MetaData, Table, Column, Integer, String, DateTime, select, insert, delete
+from sqlalchemy import Column, Integer, String, DateTime, select, delete
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import Mapped, declarative_base
+from sqlalchemy.orm import sessionmaker
 
 
 from starlite import Starlite, State, DTOFactory, Controller, Response, HTTPException
@@ -27,16 +30,6 @@ sqlalchemy_config = SQLAlchemyConfig(
 )
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
 dto_factory = DTOFactory(plugins=[sqlalchemy_plugin])
-
-# # Use Core method to describe db structure
-# metadata = MetaData()
-# employees_table = Table('employees', metadata,
-#                         Column('id', Integer(), primary_key=True, autoincrement=True),
-#                         Column('name', String(50), nullable=False, index=True),
-#                         Column('post', String(10), nullable=False),
-#                         Column('created_on', DateTime(), default=datetime.now),
-#                         Column('updated_on', DateTime(), default=datetime.now, onupdate=datetime.now))
-
 
 Base = declarative_base()
 
@@ -67,18 +60,19 @@ async def on_startup(state: State) -> None:
         "postgresql+asyncpg://{}:{}@{}/{}".format(
             db_user, db_password, db_host, db_name
         ),
+        poolclass=NullPool,
         echo=True,
     )
-    # async with engine.begin() as conn:
-    # await conn.run_sync(Base.metadata.drop_all)
-    # await conn.run_sync(Base.metadata.create_all)
-    # metadata.create_all(engine)
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     state.engine = engine
+    state.session = async_session()
+    state.session.begin()
 
 
 async def on_shutdown(state: State) -> None:
     """Closes the db connection pool stored in the application State object."""
     if getattr(state, "engine", None):
+
         await state.engine.dispose()
 
 
@@ -98,46 +92,33 @@ class EmployeeController(Controller):
     @get(name="employees_list", response_class=EmployeeResponse)
     async def employees_list(self, state: State) -> list[Employee]:
         """Get employees list and return it."""
-        async with state.engine.connect() as conn:
-            result = await conn.execute(select(Employee))
-            if not result:
-                raise HTTPException(
-                    detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
-                )
-            records_list = result.fetchall()
-            # biuld JSON based on list of sqlalchemy.engine.row.Row objects
-            employees = [
-                 {"id": record.id, "name": record.name, "post": record.post}
-                 for record in records_list
-            ]
-            return employees
+        result = await state.session.execute(select(Employee))
+        if not result:
+            raise HTTPException(
+                detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
+            )
+        records_list = result.fetchall()
+        return records_list
 
     @get(path="/{employee_id:int}/", name="employee_details", response_class=EmployeeResponse)
     async def get_employee(self, employee_id: int, state: State) -> Employee:
         """Get an employee by its ID and return it.
-        If it doesn't with that ID does not exist, return a 404 response
+        If it doesn't exist, return a 404 response
         """
-        async with state.engine.connect() as conn:
-            result = await conn.execute(select(Employee).where(Employee.id == employee_id))
-            if not result:
-                raise HTTPException(
-                    detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
-                )
-            records_list = result.fetchall()
-            employees = [
-                {"id": record.id, "name": record.name, "post": record.post}
-                for record in records_list
-            ]
-            return employees
+        result = await state.session.execute(select(Employee).where(Employee.id == employee_id))
+        records_list = result.first()
+        if not records_list:
+            raise HTTPException(
+                detail=f"No employees found", status_code=HTTP_404_NOT_FOUND
+            )
+        return records_list
 
     @post()
-    async def create_employee(self, data: CreateEmployeeDTO, state: State) -> Any:
-        async with state.engine.connect() as conn:
-            employee: Employee = data.to_model_instance()
-            result = await conn.execute(insert(Employee).values(id=employee.id, name=employee.name, post=employee.post))
-            await conn.commit()
-            return employee
-
+    async def create_employee(self, data: CreateEmployeeDTO, state: State) -> Employee:
+        employee: Employee = data.to_model_instance()
+        state.session.add(employee)
+        await state.session.commit()
+        return employee
 
 
     # @patch(path="/{employee_id:str}/")
